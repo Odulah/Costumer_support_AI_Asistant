@@ -6,3 +6,4 @@ faiss-cpu
 datasets
 pandas
 scikit-learn
+python-dotenv
