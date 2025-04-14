@@ -1,32 +1,50 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
-from pipeline import Pipeline
-from datetime import datetime, timezone
+from datetime import datetime
+from contextlib import asynccontextmanager
 import json
 import os
+from pipeline import Pipeline
 
-# Initialize FastAPI app
-app = FastAPI()
+rag_pipeline = None  # Global reference
 
-# Initialize the Pipeline class
-rag_pipeline = Pipeline()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    global rag_pipeline
+    print("🚀 Starting up... Initializing RAG pipeline")
+    try:
+        rag_pipeline = Pipeline()
+        print("✅ RAG pipeline initialized successfully")
+    except Exception as e:
+        print(f"❌ RAG pipeline failed to initialize: {e}")
+        rag_pipeline = None
 
-# Define a Pydantic model for the input query
+    yield  # Startup done
+
+    print("🛑 Shutting down FastAPI app...")
+
+app = FastAPI(lifespan=lifespan)
+
 class Query(BaseModel):
     user_query: str
 
-# Endpoint to generate a response
+@app.get("/")
+def root():
+    return {"message": "FastAPI app is live!"}
+
+@app.get("/health")
+def health_check():
+    return {"status": "healthy"}
+
 @app.post("/generate_response")
 async def generate_response(query: Query):
-    # Use the pipeline to generate a response
+    if not rag_pipeline:
+        return {"error": "RAG Pipeline not initialized."}
+
     response = rag_pipeline.run(query.user_query)
-
-    # Log the interaction
     log_interaction(query.user_query, response)
-
     return {"response": response}
 
-# Helper function to log interactions in a JSON file
 def log_interaction(user_query, response, log_path="logs/interactions.json"):
     os.makedirs(os.path.dirname(log_path), exist_ok=True)
 
@@ -36,16 +54,19 @@ def log_interaction(user_query, response, log_path="logs/interactions.json"):
         "timestamp": str(datetime.now())
     }
 
-    # Append the interaction to the JSON log file
+    data = []
     if os.path.exists(log_path):
-        with open(log_path, "r") as file:
-            data = json.load(file)
-    else:
-        data = []
+        try:
+            with open(log_path, "r") as file:
+                data = json.load(file)
+        except Exception as e:
+            print(f"⚠️ Failed to read log: {e}")
 
     data.append(interaction)
 
-    with open(log_path, "w") as file:
-        json.dump(data, file, indent=4)
-
-    print(f"📝 Logged interaction: {user_query} -> {response}")
+    try:
+        with open(log_path, "w") as file:
+            json.dump(data, file, indent=4)
+        print(f"📝 Logged interaction")
+    except Exception as e:
+        print(f"⚠️ Failed to write log: {e}")
