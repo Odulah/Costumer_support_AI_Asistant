@@ -9,3 +9,4 @@ __pycache__/
 logs/
 .env
 .vscode/
+dataset/storage/clean_data.csv
