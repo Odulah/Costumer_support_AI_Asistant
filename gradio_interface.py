@@ -1,5 +1,5 @@
 import gradio as gr
-from rag.pipeline import Pipeline
+from pipeline import Pipeline
 
 rag_pipeline = Pipeline()
 

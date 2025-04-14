@@ -1,9 +1,11 @@
 services:
   - type: web
-    name: customer-support-api
+    name: ai-assistant
     runtime: python
-    buildCommand: "pip install -r requirements.txt"
-    startCommand: "uvicorn app:app --host 0.0.0.0 --port 8000"
+    buildCommand: pip install -r requirements.txt
+    startCommand: ./start.sh
     envVars:
-      - key: HF_TOKEN
-        value: your_huggingface_tokengit 
+      - key: PYTHONUNBUFFERED
+        value: '1'
+    plan: free
+    autoDeploy: true
