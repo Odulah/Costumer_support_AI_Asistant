@@ -27,14 +27,17 @@ class VectorStore:
 
     def load_index(self, index_path="dataset/storage/faiss_index.index", mapping_path="dataset/storage/mapping.pkl"):
         try:
-            # Load the FAISS index
+            # Try loading the FAISS index
             self.index = faiss.read_index(index_path)
             with open(mapping_path, "rb") as f:
                 self.data_mapping = pickle.load(f)
             print(f"✅ Loaded index from {index_path} and mapping from {mapping_path}")
         except Exception as e:
             print(f"⚠️ Error loading index and mapping: {e}")
+            print("Attempting to rebuild the index...")
+            # You can either try to rebuild the index or raise an error if needed
             raise FileNotFoundError(f"Index not found at {index_path}")
+
 
     def save_index(self, index_path="dataset/storage/faiss_index.index", mapping_path="dataset/storage/mapping.pkl"):
         faiss.write_index(self.index, index_path)
