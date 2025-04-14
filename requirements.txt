@@ -9,6 +9,7 @@ pandas
 scikit-learn
 python-dotenv
 pydantic
+gunicorn
 numpy
 pandas
 scikit-learn
