@@ -1,8 +1,11 @@
 __pycache__/
 *.pyc
-*.pkl
-*.index
+
+# Don't ignore these specifically needed files
+!dataset/storage/
+!dataset/storage/faiss_index.index
+!dataset/storage/mapping.pkl
+
 logs/
-dataset/storage/
 .env
 .vscode/
