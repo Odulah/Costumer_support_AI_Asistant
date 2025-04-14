@@ -52,7 +52,7 @@ This project is a Retrieval-Augmented Generation (RAG) based AI assistant design
 - Created structured prompt with context Q&A + user query.
 
 **Generation**:
-- Used `tiiuae/falcon-7b-instruct` via Hugging Face Inference API.
+- Used `Mistral-7B-Instruct-v0.1` via Hugging Face Inference API.
 - Output is post-processed to return only the generated answer.
 
 ---
