@@ -3,5 +3,5 @@ services:
     name: fastapi-app
     env: python
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn -w 1 -k uvicorn.workers.UvicornWorker app:app
+    startCommand: gunicorn -w 1 -k uvicorn.workers.UvicornWorker --timeout 90 app:app
     branch: main  # Adjust if you’re deploying from another branch
