@@ -9,8 +9,11 @@ class Generator:
 
         # Get the key from environment
         hf_api_key = os.getenv("HF_API_KEY")
+        if not hf_api_key:
+            raise ValueError("❌ HF_API_KEY not found in environment variables!")
 
-        self.api_url = "https://api-inference.huggingface.co/models/tiiuae/falcon-7b-instruct"
+        # Use a lightweight, free model
+        self.api_url = "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.1"
         self.headers = {
             "Authorization": f"Bearer {hf_api_key}"
         }
@@ -19,12 +22,12 @@ class Generator:
         top_matches = top_matches[:top_k]
         context = "\n".join([f"Q: {q}\nA: {a}" for q, a, _ in top_matches])
 
-        prompt = f"""You are a helpful customer support assistant. Use the past conversations to answer the query accurately.
+        prompt = f"""Answer the following question based on the provided context.
 
 Context:
 {context}
 
-User Query: {query}
+Question: {query}
 Answer:"""
 
         payload = {
@@ -36,12 +39,12 @@ Answer:"""
             }
         }
 
-        response = requests.post(self.api_url, headers=self.headers, json=payload)
-
-        if response.status_code == 200:
-            try:
-                return response.json()[0]['generated_text'].split("Answer:")[-1].strip()
-            except Exception:
-                return "⚠️ Failed to parse model response."
-        else:
-            return f"❌ Hugging Face API error: {response.status_code}\n{response.text}"
+        try:
+            response = requests.post(self.api_url, headers=self.headers, json=payload)
+            response.raise_for_status()
+            generated_text = response.json()[0].get("generated_text", "")
+            return generated_text.split("Answer:")[-1].strip()
+        except requests.exceptions.HTTPError as http_err:
+            return f"❌ Hugging Face API error: {http_err.response.status_code}\n{http_err.response.text}"
+        except Exception as e:
+            return f"⚠️ Unexpected error: {e}"

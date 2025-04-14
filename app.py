@@ -1,25 +1,51 @@
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-import gradio as gr
-from gradio_interface import gradio_ui
+from pydantic import BaseModel
+from pipeline import Pipeline
+from datetime import datetime, timezone
+import json
+import os
 
-# FastAPI app instance
+# Initialize FastAPI app
 app = FastAPI()
 
-# Enable CORS (optional, helpful if deploying)
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# Initialize the Pipeline class
+rag_pipeline = Pipeline()
 
-@app.get("/")
-async def root():
-    return {"message": "AI Assistant API is live 🎉"}
+# Define a Pydantic model for the input query
+class Query(BaseModel):
+    user_query: str
 
-# Mount the Gradio interface
-@app.on_event("startup")
-async def startup_event():
-    gradio_ui.launch(server_name="0.0.0.0", server_port=7860, share=False, inline=False, inbrowser=False, show_api=False, prevent_thread_lock=True)
+# Endpoint to generate a response
+@app.post("/generate_response")
+async def generate_response(query: Query):
+    # Use the pipeline to generate a response
+    response = rag_pipeline.run(query.user_query)
+
+    # Log the interaction
+    log_interaction(query.user_query, response)
+
+    return {"response": response}
+
+# Helper function to log interactions in a JSON file
+def log_interaction(user_query, response, log_path="logs/interactions.json"):
+    os.makedirs(os.path.dirname(log_path), exist_ok=True)
+
+    interaction = {
+        "user_query": user_query,
+        "response": response,
+        "timestamp": str(datetime.now())
+    }
+
+    # Append the interaction to the JSON log file
+    if os.path.exists(log_path):
+        with open(log_path, "r") as file:
+            data = json.load(file)
+    else:
+        data = []
+
+    data.append(interaction)
+
+    with open(log_path, "w") as file:
+        json.dump(data, file, indent=4)
+
+    print(f"📝 Logged interaction: {user_query} -> {response}")
