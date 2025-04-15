@@ -1,20 +1,22 @@
-import gradio as gr
+from fastapi import FastAPI
+from pydantic import BaseModel
 from pipeline import Pipeline
 
 # Load the RAG pipeline once
 rag_pipeline = Pipeline()
 
-def generate_response(user_query):
-    return rag_pipeline.run(user_query)
+# Create FastAPI app instance
+app = FastAPI()
 
-# Create a Gradio Interface
-demo = gr.Interface(
-    fn=generate_response,
-    inputs=gr.Textbox(lines=2, placeholder="Ask your support question..."),
-    outputs="text",
-    title="Customer Support AI Assistant",
-    description="Ask a support question and get an AI-generated response using RAG!"
-)
+# Define the input and output models
+class QueryRequest(BaseModel):
+    user_query: str
 
-if __name__ == "__main__":
-    demo.launch()
+class QueryResponse(BaseModel):
+    response: str
+
+@app.post("/generate_response", response_model=QueryResponse)
+def generate_response(query: QueryRequest):
+    # Generate the response using the RAG pipeline
+    result = rag_pipeline.run(query.user_query)
+    return QueryResponse(response=result)
