@@ -1,7 +1,7 @@
 import requests
 import os
 from dotenv import load_dotenv
-
+load_dotenv()
 class Generator:
     def __init__(self):
         # Load environment variables from .env
