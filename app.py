@@ -6,7 +6,7 @@ import json
 import os
 from pipeline import Pipeline
 
-rag_pipeline = None  # Global reference
+rag_pipeline = None  # Global pipeline object
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -19,7 +19,7 @@ async def lifespan(app: FastAPI):
         print(f"❌ RAG pipeline failed to initialize: {e}")
         rag_pipeline = None
 
-    yield  # Startup done
+    yield  # Ready for requests
 
     print("🛑 Shutting down FastAPI app...")
 
@@ -34,16 +34,21 @@ def root():
 
 @app.get("/health")
 def health_check():
-    return {"status": "healthy"}
+    status = "ready" if rag_pipeline else "not ready"
+    return {"status": status}
 
 @app.post("/generate_response")
 async def generate_response(query: Query):
     if not rag_pipeline:
         return {"error": "RAG Pipeline not initialized."}
 
-    response = rag_pipeline.run(query.user_query)
-    log_interaction(query.user_query, response)
-    return {"response": response}
+    try:
+        response = rag_pipeline.run(query.user_query)
+        log_interaction(query.user_query, response)
+        return {"response": response}
+    except Exception as e:
+        print(f"❌ Error while processing query: {e}")
+        return {"error": "Failed to process query. Please try again later."}
 
 def log_interaction(user_query, response, log_path="logs/interactions.json"):
     os.makedirs(os.path.dirname(log_path), exist_ok=True)
