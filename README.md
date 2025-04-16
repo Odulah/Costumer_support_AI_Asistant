@@ -133,7 +133,7 @@ python gradio_ui.py
 ---
 
 ## 🚀 Notes on security
-
+```bash
 API keys (OpenRouter) are stored in .env and never exposed.
 
 python-dotenv handles secure loading of environment variables.
@@ -141,11 +141,12 @@ python-dotenv handles secure loading of environment variables.
 ---
 
 ## 🔗 Live Demo
-
+```bash
 https://costumer-support-ai-asistant-1.onrender.com/docs
 
 ----
 
 ## 🤝 Credits
+```bash
 Built by Aadil Maqbool for the Customer Support AI Assistant Challenge.
 
