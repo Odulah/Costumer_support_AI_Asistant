@@ -1,66 +1,70 @@
 # Customer Support AI Assistant
 
 ## 🔍 Overview
-This project is a Retrieval-Augmented Generation (RAG) based AI assistant designed to help answer customer support queries. It retrieves relevant past Q&A data and generates contextual, human-like responses using the Falcon-7B model from Hugging Face.
+This project is a **Retrieval-Augmented Generation (RAG)** based AI assistant designed to answer customer support queries. It retrieves the most relevant historical Q&A data and generates contextual, human-like responses using the **`mistralai/mistral-7b-instruct`** model via **OpenRouter.ai** API.
+
+The app is now **fully deployed** with optimized performance and dual interfaces — powered by **FastAPI** and a more interactive **Gradio** UI for quick testing.
 
 ---
 
 ## ✅ Submission Checklist
-- [x] Clean, modular GitHub repository ✅
-- [x] API endpoint (optional: can be deployed using Replit/Render) ✅
-- [x] README and PPT with approach, RAG details, and explainability ✅
+- [x] Clean, modular GitHub repository ✅  
+- [x] Fully deployed model integration with OpenRouter ✅  
+- [x] FastAPI and Gradio interfaces ✅  
+- [x] Optimized codebase for performance ✅  
+- [x] README and PPT with approach, RAG details, and explainability ✅  
 
 ---
 
 ## 🛠️ Tech Stack
-- Python
-- FastAPI
-- Hugging Face Transformers & Inference API
-- FAISS (Facebook AI Similarity Search)
-- SentenceTransformers (`all-MiniLM-L6-v2`)
+- Python  
+- FastAPI  
+- Gradio  
+- FAISS (Facebook AI Similarity Search)  
+- Hugging Face SentenceTransformers (`all-MiniLM-L6-v2`)  
+- OpenRouter API (`mistralai/mistral-7b-instruct`)  
 
 ---
 
 ## 🧠 Approach Taken
+
 1. **Data Loading & Cleaning:**
    - Loaded customer support Q&A dataset from Hugging Face: `MohammadOthman/mo-customer-support-tweets-945k`
-   - Cleaned null and duplicate values.
-   - Saved as `clean_data.csv`.
+   - Removed nulls and duplicates, saved as `clean_data.csv`.
 
 2. **Embedding & Indexing:**
-   - Used SentenceTransformer model `all-MiniLM-L6-v2` for embedding queries.
-   - Built a FAISS vector index to support fast semantic similarity search.
+   - Used `all-MiniLM-L6-v2` for semantic embedding.
+   - Built FAISS index for fast vector similarity search.
 
 3. **RAG Pipeline:**
-   - **Retrieval:** Given a query, retrieve top 3 most semantically similar past Q&As.
-   - **Augmentation:** Create a prompt by combining retrieved Q&As with the user's query.
-   - **Generation:** Send the prompt to Falcon-7B via Hugging Face API to generate a final response.
+   - **Retrieval:** Top 3 most semantically similar Q&As are selected.
+   - **Augmentation:** Prompt is formed using retrieved context and the user query.
+   - **Generation:** Prompt sent to `mistralai/mistral-7b-instruct` via OpenRouter API to generate a helpful, context-aware answer.
 
-4. **Serving via API:**
-   - Used FastAPI to expose a `/generate` endpoint for the assistant.
+4. **Serving the App:**
+   - **FastAPI** backend with `/generate` endpoint.
+   - **Gradio** front-end for real-time interaction (preferred for usability).
 
 ---
 
 ## 🔄 RAG Implementation
-**Retrieval**:
-- Vector representation of queries built using `all-MiniLM-L6-v2`.
-- Indexed using FAISS with L2 similarity.
-- Search function retrieves top_k matches.
+**Retrieval**  
+- Embeds and indexes Q&A pairs using `all-MiniLM-L6-v2` + FAISS  
+- Uses L2 similarity to retrieve relevant examples
 
-**Augmentation**:
-- Selected top 3 matches.
-- Created structured prompt with context Q&A + user query.
+**Augmentation**  
+- Combines top 3 retrieved Q&As with the user query to build the context-rich prompt
 
-**Generation**:
-- Used `Mistral-7B-Instruct-v0.1` via Hugging Face Inference API.
-- Output is post-processed to return only the generated answer.
+**Generation**  
+- Prompt passed to `mistralai/mistral-7b-instruct` via OpenRouter  
+- Output is cleaned and post-processed for delivery
 
 ---
 
 ## 📢 Explainability Techniques
-- Matching Q&A pairs and similarity scores are logged and can be optionally returned.
-- Keeps responses traceable and easy to debug.
-- (Optional future enhancement: use LIME/SHAP for deeper model transparency.)
+- Matching Q&As and similarity scores are logged for traceability.
+- Debugging and transparency supported with optional logs.
+- *(Planned)* LIME/SHAP integration for deeper model understanding.
 
 ---
 
@@ -115,11 +119,32 @@ uvicorn app.main:app --reload
 
 ---
 
-## 🔐 Notes on Security
-- API key is stored in `.env` file and not pushed to GitHub.
-- Use `python-dotenv` to load it securely.
+## 🚀 How to Run Locally
+```bash
+# Step 1: Install dependencies
+pip install -r requirements.txt
+
+# Step 2: Run FastAPI server
+uvicorn app:app --reload
+
+# (Optional) Run Gradio UI
+python gradio_ui.py
 
 ---
+
+## 🚀 Notes on security
+
+API keys (OpenRouter) are stored in .env and never exposed.
+
+python-dotenv handles secure loading of environment variables.
+
+---
+
+## 🔗 Live Demo
+
+https://costumer-support-ai-asistant-1.onrender.com/docs
+
+----
 
 ## 🤝 Credits
 Built by Aadil Maqbool for the Customer Support AI Assistant Challenge.
