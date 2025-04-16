@@ -1,28 +1,31 @@
 import requests
 import os
 from dotenv import load_dotenv
+
 load_dotenv()
+
 class Generator:
     def __init__(self):
-        # Load environment variables from .env
-        load_dotenv()
+        # Load API key from environment
+        openrouter_api_key = os.getenv("OPENROUTER_API_KEY")
+        if not openrouter_api_key:
+            raise ValueError("❌ OPENROUTER_API_KEY not found in environment variables!")
 
-        # Get the key from environment
-        hf_api_key = os.getenv("HF_API_KEY")
-        if not hf_api_key:
-            raise ValueError("❌ HF_API_KEY not found in environment variables!")
-
-        # Use a lightweight, free model
-        self.api_url = "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.1"
+        # Set OpenRouter endpoint and headers
+        self.api_url = "https://openrouter.ai/api/v1/chat/completions"
         self.headers = {
-            "Authorization": f"Bearer {hf_api_key}"
+            "Authorization": f"Bearer {openrouter_api_key}",
+            "Content-Type": "application/json"
         }
+
+        # Set the model
+        self.model = "mistralai/mistral-7b-instruct"
 
     def generate_response(self, query, top_matches, top_k=3):
         top_matches = top_matches[:top_k]
         context = "\n".join([f"Q: {q}\nA: {a}" for q, a, _ in top_matches])
 
-        prompt = f"""Answer the following question based on the provided context.
+        prompt = f"""You are a helpful customer support assistant. Use the context below to answer the question.
 
 Context:
 {context}
@@ -31,20 +34,21 @@ Question: {query}
 Answer:"""
 
         payload = {
-            "inputs": prompt,
-            "parameters": {
-                "max_new_tokens": 200,
-                "temperature": 0.7,
-                "top_p": 0.9
-            }
+            "model": self.model,
+            "messages": [
+                {"role": "system", "content": "You are a helpful AI assistant for customer support."},
+                {"role": "user", "content": prompt}
+            ],
+            "temperature": 0.7,
+            "max_tokens": 200
         }
 
         try:
             response = requests.post(self.api_url, headers=self.headers, json=payload)
             response.raise_for_status()
-            generated_text = response.json()[0].get("generated_text", "")
-            return generated_text.split("Answer:")[-1].strip()
+            data = response.json()
+            return data['choices'][0]['message']['content'].strip()
         except requests.exceptions.HTTPError as http_err:
-            return f"❌ Hugging Face API error: {http_err.response.status_code}\n{http_err.response.text}"
+            return f"❌ OpenRouter API error: {http_err.response.status_code}\n{http_err.response.text}"
         except Exception as e:
             return f"⚠️ Unexpected error: {e}"
