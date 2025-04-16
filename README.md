@@ -129,7 +129,7 @@ uvicorn app:app --reload
 
 # (Optional) Run Gradio UI
 python gradio_ui.py
-
+```
 ---
 
 ## 🚀 Notes on security
@@ -137,13 +137,13 @@ python gradio_ui.py
 API keys (OpenRouter) are stored in .env and never exposed.
 
 python-dotenv handles secure loading of environment variables.
-
+```
 ---
 
 ## 🔗 Live Demo
 ```bash
 https://costumer-support-ai-asistant-1.onrender.com/docs
-
+```
 ----
 
 ## 🤝 Credits
