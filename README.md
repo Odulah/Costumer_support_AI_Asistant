@@ -142,8 +142,7 @@ python-dotenv handles secure loading of environment variables.
 
 ## 🔗 Live Demo
 ```bash
-
-[Customer Support AI Assistant ](https://costumer-support-ai-asistant-1.onrender.com/docs)
+https://costumer-support-ai-asistant-1.onrender.com/docs
 ```
 ----
 
